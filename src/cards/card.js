@@ -22,24 +22,31 @@
 
 import React from 'react';
 import { useState } from 'react'
+const { forwardRef, useRef, useImperativeHandle } = React;
 
-const Card = ({ indxType, indxNumber }) => {
+const Card = forwardRef(({ indxType, indxNumber, handleDragStart_parent}, ref) => {
   const width = 177;
   const height = 268;
 
   const getStarPoint = () =>{
     const x = 15 + indxNumber * 196
     const y = 17 + indxType * 285
-    console.log(`-${x}px -${y}px`)
+    // console.log(`-${x}px -${y}px`)
     return `-${x}px -${y}px`
   }
 
 
   const [skin, setSkin] = useState('-15px -1157px');
   const [developed, setDeveloped] = useState(false);
+  const [positon, setPosition] = useState({top:0, left:0})
 
+  const handleDragStart = (e) => {
+    handleDragStart_parent(indxType, indxNumber)
+    e.dataTransfer.setData('indxType', indxType);
+    e.dataTransfer.setData('indxNumber', indxNumber);
+  };
 
-  const flipCard = () => {
+    const flipCard =() => {
     setDeveloped(!developed)
     if (!developed) {
       setSkin('-15px -1157px')
@@ -48,10 +55,15 @@ const Card = ({ indxType, indxNumber }) => {
     }
   }
 
-  const handleDragStart = (e) => {
-    console.log(e)
-    e.dataTransfer.setData('cardId', 'unique_card_id'); // Establece un identificador único para la carta
-  };
+
+  useImperativeHandle(ref, () => ({
+    flipCard () {flipCard()},
+    moveCard (x, y) {setPosition({top:y, left:x})}
+  }));
+
+
+
+  
 
   return (
     <div
@@ -63,15 +75,15 @@ const Card = ({ indxType, indxNumber }) => {
                 borderRadius: '20px',
                 borderColor: 'black',
                 borderStyle: 'solid',
-                // position: 'absolute',
-                top: '40px',
-                left: '40px'
+                position: 'relative',
+                top: `${positon.top}px`,
+                left: `${positon.left}px`
               }}
-      //   draggable="true"
-      // onDragStart={handleDragStart}
+        draggable="true"
+      onDragStart={handleDragStart}
       onClick={()=> flipCard()}
     ></div>
   );
-};
+});
 
 export default Card;
