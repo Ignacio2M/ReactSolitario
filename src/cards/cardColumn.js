@@ -1,58 +1,88 @@
 import React from "react";
 import { useState } from 'react'
 import Card from "./card";
-const { forwardRef, useRef, useImperativeHandle } = React;
+import FlipCardSet from "./fipCardsSet";
+const { forwardRef, useRef, useImperativeHandle, useEffect } = React;
+const _ = require('lodash');
 
+const ColumCard = forwardRef(({ listCards, updateCard, id }, ref) => {
 
-const ColumCard = ({ listCards }) => {
+    const reverseRef = useRef();
 
     const [grupCard, setGrupCard] = useState(listCards)
-    const childRef = useRef();
 
-    const removeCard = ({type, number}) => {
-        const new_grup = grupCard.filter(function(item) {
-            return item.type !== type || item.number !== number
-        })
-        console.log(new_grup)
-        setGrupCard(new_grup)
+
+    // const cards = grupCard.filter((card) => !card.canMove).map((card) =>
+    //     <Card row={card.row}
+    //         column={card.colum}
+    //         revelate={card.revelate}
+    //         canMove={card.canMove}
+    //         cardId={card.id} />)
+
+
+    const cards = _.reduceRight(grupCard, (result, card) => {
+        const cardHtml = <Card row={card.row}
+            column={card.colum}
+            revelate={card.revelate}
+            canMove={card.canMove}
+            cardId={card.id} />
+
+        return <div className="set" draggable={card.canMove}>
+            {cardHtml}
+            <div className="card">
+                {result}
+            </div>
+
+        </div>
     }
 
-    const AAAA = (a, b) => {
-        const cardRemove = {type:a, number:b}
-        console.log(cards)
-        // removeCard(cardRemove)
-    }
+        , <></>)
 
-    const cards = grupCard.map((card) => <Card indxType={card.type} indxNumber={card.number} ref={childRef} handleDragStart_parent={AAAA}/>)
-    
-    
+    const revelateCard = <FlipCardSet listCards={grupCard.filter((card) => card.canMove)} ref={reverseRef} />
 
+    const handleDrop = (e) => {
+
+        // e.preventDefault();
+        // console.log(e.dataTransfer.getData('tepy'))
+
+        if (e.dataTransfer.getData('tepy') == 'relevateColums') {
+            const cardsMoveds = JSON.parse(e.dataTransfer.getData('cardsInfo'))
+
+            if (_.size(cardsMoveds.filter(elemento => _.size(grupCard.filter((card) => elemento.id == card.id)) > 0)) == 0) {
+                setGrupCard([...grupCard, ...cardsMoveds])
+                updateCard(cardsMoveds, id)
+            }
+        }
+
+    };
+
+    useEffect(() => {
+        // console.log(grupCard)
+        const recverseCard = grupCard.filter((card) => card.canMove)
+        // reverseRef.current.updateCards(recverseCard)
+    }, [grupCard]);
 
     const handleDragOver = (e) => {
         e.preventDefault();
-
+        // console.log("vcvvvvvv")
     };
 
-    const handleDrop = (e) => {
-        e.preventDefault();
-        console.log({type:e.dataTransfer.getData('indxType'),
-        number:e.dataTransfer.getData('indxNumber')})
-        setGrupCard([...grupCard, {type:e.dataTransfer.getData('indxType'),
-        number:e.dataTransfer.getData('indxNumber')}])
-    };
-
+    useImperativeHandle(ref, () => ({
+        updateCards(newCards) { setGrupCard(newCards) }
+    }));
 
     return (
         <div
             onDragOver={handleDragOver}
             onDrop={handleDrop}
-            style={{ backgroundColor: 'gray' }}>
-            <div>{cards}</div>
+            className='colum'>
+            {cards}
+            {/* {revelateCard} */}
             {/* <button onClick={() => childRef.current.flipCard()}>Click</button> */}
         </div>
     );
 
 
 
-}
+});
 export default ColumCard;

@@ -11,3 +11,20 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.set {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: repeat(6, 67px);
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+  }
+  
+.card { grid-area: 2 / 1 / 7 / 2; } 
+
+.colum {
+  background-color: gray;
+  padding: 10px;
+  width: min-content;
+  float: left;
+}

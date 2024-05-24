@@ -38,10 +38,19 @@
 // export default App;
 
 import React from 'react';
-import Card from './cards/card';
+// import Card from './cards/card';
+import ColumCard from './cards/cardColumn';
+import CardSets from './cards/cardsSets';
 import DropZone from './cards/dropZone';
+import {cardsInfo} from './cards/cardInfo'
+
+
+const{useEffect } = React;
+
 
 const App = () => {
+  
+
   
 
   return (
@@ -54,21 +63,23 @@ const App = () => {
     // </div>
 
     <div>
-      <h1>Arrastrar y Soltar Cartas</h1>
-      
-      <div className="card-container">
-      <Card  indxType={0} indxNumber={0} />
-      <Card  indxType={1} indxNumber={0} />
-      <Card  indxType={2} indxNumber={0} />
-      <Card  indxType={3} indxNumber={0} />
-      <Card  indxType={4} indxNumber={0} />
-
-
-
-
-        {/* Agrega más componentes Card según sea necesario */}
+      {/* <h1>Arrastrar y Soltar Cartas</h1>
+      <div class="parent">
+        <div class="colum3">
+          <Card  indxType={0} indxNumber={0} />
+          <Card  indxType={1} indxNumber={0} />
+          <Card  indxType={2} indxNumber={0} />
+          <Card  indxType={3} indxNumber={0} />
+          <Card  indxType={4} indxNumber={0} />
+        </div>
       </div>
-      <DropZone />
+      <DropZone /> */}
+
+      {/* <ColumCard listCards={[{type:0, number:0}, {type:0, number:1}, {type:0, number:2}]} />
+      <ColumCard listCards={[{type:1, number:0}, {type:1, number:1}, {type:1, number:2}]} /> */}
+
+      <CardSets cardsList = {cardsInfo.cards} numColums = {4} />
+      
     </div>
   );
 };
