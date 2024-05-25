@@ -2,10 +2,16 @@ import React from 'react';
 import { useState } from 'react'
 import Card from './card';
 import ColumCard from './cardColumn';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import { isEqual } from 'lodash';
+
 const _ = require('lodash');
+
+
 const { forwardRef, useRef, useImperativeHandle, useEffect } = React;
 
-const CardSets = forwardRef(({ cardsList, numColums }, ref) => {
+const CardSets = ({ cardsList, numColums }) => {
 
 
     const shafelCards = () => {
@@ -33,58 +39,50 @@ const CardSets = forwardRef(({ cardsList, numColums }, ref) => {
 
     const [grupsCards, setGrupsCards] = useState(shafelCards)
 
-    const refListCard = useRef()
 
+    const moveCard = (fromColumn, toColumn, card) => {
+        setGrupsCards(prevColumns => {
+           // Clonar las columnas para evitar mutación directa
+          const newColumns = [...prevColumns];
+          const fromColumnCards = [...newColumns[fromColumn]];
+          const toColumnCards = [...newColumns[toColumn]];
 
-    const compareList = (listObject, listTarget) => {
-        const include = _.size(listObject.filter((cardObject) => _.size(listTarget.filter((cardTarget) => cardTarget.id == cardObject.id)) > 0)) > 0
-       return include
-    }
+          const cardIndex = fromColumnCards.indexOf(card);
+          
+        
+
+          if (cardIndex > -1 && card.canMove) {
+            const setCartReverse = _.slice(fromColumnCards, cardIndex, _.size(fromColumnCards))
+
+            fromColumnCards.splice(cardIndex, _.size(setCartReverse));
+            const newToColumnCards = toColumnCards.concat(setCartReverse);
+            if (_.size(fromColumnCards) > 0){
+              _.last(fromColumnCards).revelate = true
+              _.last(fromColumnCards).canMove = true
+            }
+            // console.log(fromColumnCards[0])
+            // console.log(grupsCards[1][0])
+            newColumns[fromColumn] = fromColumnCards;
+            newColumns[toColumn] = newToColumnCards;
+            // console.log(newColumns)
+            return newColumns;
+          }
+          return prevColumns;
+         
+        });
+        
+      };
     
-    const updateCard = (cards, id) => {
-        // console.log(id)
-        // console.log(cards)
 
 
-
-        // Remove card
-        const igualCardSize = grupsCards.map((cardsList) => compareList(cardsList, cards))
-        const indexList = _.findIndex(igualCardSize, (contain) => contain);
-        const a = grupsCards
-        a[indexList] = a[indexList].filter((card) => !_.size(cards.filter((cardTarget) => cardTarget.id == card.id))> 0)
-        setGrupsCards(a)
-        console.log(grupsCards)
-        refListCard.current.updateCards()
-        
-        // if (indexList){
-        //     console.log(grupsCards[indexList].card)
-        //     grupsCards[indexList].card = [...grupsCards[indexList].card, ...cards]
-        //     console.log(grupsCards[indexList].card)
-        
-        //     var evens = _.remove(grupsCards[id].card, function(n) {
-        //         return cards.find((card) => card.id == n.id);
-        //       });
-        //     console.log(evens)
-
-        // }
-    }
-
-
-    const colums = grupsCards.map((cardInfo, index) => <ColumCard listCards={cardInfo} id={index} updateCard={updateCard} ref={refListCard}/>)
-
-
-    return (
-        <div
-            // className="card"
-        // draggable="true"
-        // onDragStart={handleDragStart}
-        // onDragOver={handleDragOver}
-        // onDrop={handleDrop}
-
-        >
-            {colums}
-        </div>
-    );
-});
+return (
+  <DndProvider backend={HTML5Backend}>
+    <div className='column'>
+        {grupsCards.map((cardInfo, index) =>( <ColumCard key={index} listCards={cardInfo} id={index} moveCard={moveCard} />))}
+    </div>
+  </DndProvider>
+    
+);
+};
 
 export default CardSets;

@@ -12,19 +12,16 @@ code {
     monospace;
 }
 
-.set {
+.parent {
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: repeat(6, 67px);
+  grid-template-rows: repeat(12, 67px);
   grid-column-gap: 0px;
   grid-row-gap: 0px;
-  }
-  
-.card { grid-area: 2 / 1 / 7 / 2; } 
-
-.colum {
   background-color: gray;
   padding: 10px;
-  width: min-content;
+  width: 204px;
   float: left;
-}
+  }
+  
+.set { grid-area: 1 / 1 / 7 / 2; } 
