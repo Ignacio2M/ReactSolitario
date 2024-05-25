@@ -22,21 +22,24 @@
 
 import React from 'react';
 import { useState } from 'react'
+import { useDrag } from 'react-dnd';
+
 const { forwardRef, useRef, useImperativeHandle} = React;
 
-const Card = ({ row, column, revelate, canMove, cardId }) => {
+
+const Card = ({card, fromColumn}) => {
   const width = 177;
   const height = 268;
 
   const getStarPoint = () => {
-    const x = 15 + column * 196
-    const y = 17 + row * 285
+    const x = 15 + card.column * 196
+    const y = 17 + card.row * 285
     // console.log(`-${x}px -${y}px`)
     return `-${x}px -${y}px`
   }
 
   const startSking = () => {
-    if (revelate){
+    if (card.revelate){
       return getStarPoint()
     }else{
       return '-15px -1157px'
@@ -45,42 +48,32 @@ const Card = ({ row, column, revelate, canMove, cardId }) => {
 
 
   const [skin, setSkin] = useState(startSking());
-  const [developed, setDeveloped] = useState(revelate);
+  const [developed, setDeveloped] = useState(card.revelate);
   const [positon, setPosition] = useState({ top: 0, left: 0 })
 
-  const handleDragStart = (e) => {
-    console.log("aaaaaaaaaaaaaaaaaa")
-    e.dataTransfer.setData('cardId', cardId);
-    e.dataTransfer.setData('row', row);
-    e.dataTransfer.setData('colum', column);
-    e.dataTransfer.setData('revelate', revelate);
-    e.dataTransfer.setData('canMove', canMove);    
-  };
+  
 
   const flipCard = () => {
-    setDeveloped(!developed)
-    if (!developed) {
-      setSkin('-15px -1157px')
-    } else {
-      setSkin(getStarPoint())
-    }
-    console.log({ row, column, cardId })
+    console.log(card)
+    // setDeveloped(!developed)
+    // if (!developed) {
+    //   setSkin('-15px -1157px')
+    // } else {
+    //   setSkin(getStarPoint())
+    // }
   }
 
-
-
-  // useImperativeHandle(ref, () => ({
-  //   flipCard () {flipCard()},
-  //   moveCard (x, y) {setPosition({top:y, left:x})}
-  // }));
-
-
-
-
+  const [, drag] = useDrag({
+    type: 'CARD',
+    item: { type: 'CARD', card, fromColumn },
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
+  });
 
   return (
     <div
-      
+    ref={drag}
       style={{
         backgroundImage: 'url("Cards_a.png")',
         backgroundPosition: skin,
@@ -94,7 +87,7 @@ const Card = ({ row, column, revelate, canMove, cardId }) => {
         left: `${positon.left}px`
       }}
       // draggable={canMove}
-      onDragStart={handleDragStart}
+      // onDragStart={handleDragStart}
       onClick={() => {flipCard()}}
       // cardId = {cardId}
     ></div>
