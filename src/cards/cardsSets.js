@@ -43,26 +43,32 @@ const CardSets = ({ cardsList, numColums }) => {
     const moveCard = (fromColumn, toColumn, card) => {
         setGrupsCards(prevColumns => {
            // Clonar las columnas para evitar mutación directa
-           const newColumns = [...prevColumns];
+          const newColumns = [...prevColumns];
           const fromColumnCards = [...newColumns[fromColumn]];
           const toColumnCards = [...newColumns[toColumn]];
 
           const cardIndex = fromColumnCards.indexOf(card);
+          
+        
+
           if (cardIndex > -1 && card.canMove) {
-            fromColumnCards.splice(cardIndex, 1);
-            toColumnCards.push(card);
+            const setCartReverse = _.slice(fromColumnCards, cardIndex, _.size(fromColumnCards))
+
+            fromColumnCards.splice(cardIndex, _.size(setCartReverse));
+            const newToColumnCards = toColumnCards.concat(setCartReverse);
             if (_.size(fromColumnCards) > 0){
               _.last(fromColumnCards).revelate = true
               _.last(fromColumnCards).canMove = true
             }
-            console.log(fromColumnCards[0])
-            console.log(grupsCards[1][0])
+            // console.log(fromColumnCards[0])
+            // console.log(grupsCards[1][0])
+            newColumns[fromColumn] = fromColumnCards;
+            newColumns[toColumn] = newToColumnCards;
+            // console.log(newColumns)
+            return newColumns;
           }
-          
-          newColumns[fromColumn] = fromColumnCards;
-          newColumns[toColumn] = toColumnCards;
-          console.log(newColumns)
-          return newColumns;
+          return prevColumns;
+         
         });
         
       };
