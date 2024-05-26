@@ -12,6 +12,7 @@ const ColumCard = ({ listCards, id, moveCard }) => {
         accept: 'CARD',
         drop: (item) => {
             if (item.fromColumn !== id) {
+                console.log("aaaaa")
                 moveCard(item.fromColumn, id, item.card);
             }
         }

@@ -62,7 +62,7 @@ const App = () => {
     //   {/* Agrega más componentes Card con las coordenadas y dimensiones de cada carta */}
     // </div>
 
-    <div>
+    <div className='board'>
       {/* <h1>Arrastrar y Soltar Cartas</h1>
       <div class="parent">
         <div class="colum3">
@@ -78,7 +78,7 @@ const App = () => {
       {/* <ColumCard listCards={[{type:0, number:0}, {type:0, number:1}, {type:0, number:2}]} />
       <ColumCard listCards={[{type:1, number:0}, {type:1, number:1}, {type:1, number:2}]} /> */}
 
-      <CardSets cardsList = {cardsInfo.cards} numColums = {4} />
+      <CardSets cardsList = {cardsInfo.cards} numColums = {7} />
       
     </div>
   );
