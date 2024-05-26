@@ -11,6 +11,7 @@ const { forwardRef, useRef, useImperativeHandle, useEffect } = React;
 
 const CardSets = ({ cardsList, numColums }) => {
 
+  const [grupsCardsDict, setGrupsCardsDict] = useState([])
 
   const shafelCards = () => {
     for (let i = cardsList.length - 1; i > 0; i--) {
@@ -27,18 +28,31 @@ const CardSets = ({ cardsList, numColums }) => {
       new_list = new_list.filter(elemento => !supSet.includes(elemento));
       _.last(supSet).revelate = true
       _.last(supSet).canMove = true
+
+      setGrupsCardsDict((lastValue) => {
+        return [{ type: 'game', index: i }, ...lastValue]
+      })
+
       // console.log(_.last(supSet))
       setsCards = [supSet, ...setsCards]
     }
 
     // reserve pack of cards
+    setGrupsCardsDict((lastValue) => {
+      return [{ type: 'game', index: numColums + 1 }, ...lastValue]
+    })
+
     setsCards = [...setsCards, new_list]
 
     return setsCards
   }
 
-
   const [grupsCards, setGrupsCards] = useState(shafelCards)
+
+
+
+
+
 
 
   const moveCard = (fromColumn, toColumn, card) => {
@@ -60,14 +74,14 @@ const CardSets = ({ cardsList, numColums }) => {
       console.log(cardIndex)
 
       // Expecial cases
-      if (cardIndex > -1 && fromColumn == _.size(grupsCards)-1){
-        
+      if (cardIndex > -1 && fromColumn == _.size(grupsCards) - 1) {
+
         fromColumnCards.splice(cardIndex, 1);
-        const newToColumnCards = [...toColumnCards, card]
+        const newToColumnCards = toColumnCards.concat([card])
 
         newColumns[fromColumn] = fromColumnCards;
         newColumns[toColumn] = newToColumnCards;
-        // console.log(newColumns)
+        console.log(fromColumnCards)
         return newColumns;
       }
       // Normal Case
@@ -89,14 +103,33 @@ const CardSets = ({ cardsList, numColums }) => {
       return prevColumns;
 
     });
-
   };
+
+  const flipCard = (fromColumn, card) => {
+    setGrupsCards(prevColumns => {
+      // Clonar las columnas para evitar mutación directa
+      const newColumns = [...prevColumns];
+      const fromColumnCards = [...newColumns[fromColumn]];
+
+      const cardIndex = fromColumnCards.indexOf(card);
+      if (cardIndex > -1) {
+        card.revelate = !card.revelate
+        card.canMove = !card.canMove
+        fromColumnCards.splice(cardIndex, 1);
+        const newFromColumnCards = [...fromColumnCards, card]
+        newColumns[fromColumn] = newFromColumnCards;
+        return newColumns;
+      }
+      return prevColumns;
+    })
+
+  }
 
 
   return (
     <DndProvider backend={HTML5Backend}>
       <div className='reservationPack'>
-      {grupsCards.slice(numColums, _.size(grupsCards)).map((cardInfo, index) => (<ReservedCards cardsList={cardInfo} id={_.size(grupsCards)-1}></ReservedCards>))}
+        {grupsCards.slice(numColums, _.size(grupsCards)).map((cardInfo, index) => (<ReservedCards key={cardInfo} cardsList={cardInfo} id={_.size(grupsCards) - 1} _flipCard={flipCard}></ReservedCards>))}
 
       </div>
       <div className='gameZone'>

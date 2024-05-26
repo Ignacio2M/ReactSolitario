@@ -27,13 +27,14 @@ import { useDrag } from 'react-dnd';
 const { forwardRef, useRef, useImperativeHandle} = React;
 
 
-const Card = ({card, fromColumn}) => {
+const Card = ({card, fromColumn, positionStyle}) => {
   const width = 177;
   const height = 268;
 
   const getStarPoint = () => {
     const x = 15 + card.column * 196
     const y = 17 + card.row * 285
+    // console.log(card)
     // console.log(`-${x}px -${y}px`)
     return `-${x}px -${y}px`
   }
@@ -54,7 +55,7 @@ const Card = ({card, fromColumn}) => {
   
 
   const flipCard = () => {
-    console.log(card)
+    // console.log(card)
     // setDeveloped(!developed)
     // if (!developed) {
     //   setSkin('-15px -1157px')
@@ -69,6 +70,7 @@ const Card = ({card, fromColumn}) => {
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
+    
   });
 
   return (
@@ -82,9 +84,7 @@ const Card = ({card, fromColumn}) => {
         borderRadius: '20px',
         borderColor: 'black',
         borderStyle: 'solid',
-        position: 'relative',
-        top: `${positon.top}px`,
-        left: `${positon.left}px`
+        position:positionStyle? positionStyle : 'relative'
       }}
       // draggable={canMove}
       // onDragStart={handleDragStart}
