@@ -91,51 +91,62 @@ const CardSets = ({ cardsList, numColumns }) => {
           const fromColumnInfo = { ...copyGrupsCardsDict[fromColumnInfoIndex] }
           const toColumnInfoIndex = _.findIndex(copyGrupsCardsDict, (columInfo) => columInfo.index == toColumn.index && columInfo.type == toColumn.type)
           const toColumnInfo = { ...copyGrupsCardsDict[toColumnInfoIndex] }
-          // Find index of card
-          const indexCard = _.findIndex(fromColumnInfo.cards, (originalCard) => originalCard.id == card.id)
-          if (indexCard > -1) {
-            const cardsPack = _.slice(fromColumnInfo.cards, indexCard, _.size(fromColumnInfo.cards))
-            console.log(cardsPack)
-            // Remove cards fron fromColumnInfo
-            fromColumnInfo.cards.splice(indexCard, _.size(cardsPack))
-            // Add cards toColum
-            toColumnInfo.cards = [...toColumnInfo.cards, ...cardsPack]
+        
+          if ((_.size(toColumnInfo.cards) == 0 && card.column == 12) ||
+            (_.size(toColumnInfo.cards) > 0 && _.last(toColumnInfo.cards).row % 2 != card.row % 2 && _.last(toColumnInfo.cards).column- 1 == card.column)) {
+            // Find index of card
+            const indexCard = _.findIndex(fromColumnInfo.cards, (originalCard) => originalCard.id == card.id)
+            if (indexCard > -1) {
+              const cardsPack = _.slice(fromColumnInfo.cards, indexCard, _.size(fromColumnInfo.cards))
+              // console.log(cardsPack)
+              // Remove cards fron fromColumnInfo
+              fromColumnInfo.cards.splice(indexCard, _.size(cardsPack))
+              // Add cards toColum
+              toColumnInfo.cards = [...toColumnInfo.cards, ...cardsPack]
+              // Flip las card
+              const lastCardToColum = _.last(fromColumnInfo.cards)
+              if (lastCardToColum && (!lastCardToColum.revelate || !lastCardToColum.canMove)) {
+                _.last(fromColumnInfo.cards).revelate = true
+                _.last(fromColumnInfo.cards).canMove = true
+              }
+              copyGrupsCardsDict[fromColumnInfoIndex] = fromColumnInfo;
+              copyGrupsCardsDict[toColumnInfoIndex] = toColumnInfo;
+              console.log(copyGrupsCardsDict)
+              return copyGrupsCardsDict
+            }
 
           }
-          // Flip las card
-          const lastCardToColum = _.last(fromColumnInfo.cards)
-          if (lastCardToColum && (!lastCardToColum.revelate || !lastCardToColum.canMove)) {
-            _.last(fromColumnInfo.cards).revelate = true
-            _.last(fromColumnInfo.cards).canMove = true
-          }
-          copyGrupsCardsDict[fromColumnInfoIndex] = fromColumnInfo;
-          copyGrupsCardsDict[toColumnInfoIndex] = toColumnInfo;
-          console.log(copyGrupsCardsDict)
-          return copyGrupsCardsDict
+
 
         }
-
         else if (fromColumnInfoIndex > -1 && toColumn.type == 'discarColum') {
           const fromColumnInfo = { ...copyGrupsCardsDict[fromColumnInfoIndex] }
           const lastCardFromColum = _.last(fromColumnInfo.cards)
           if (lastCardFromColum.canMove && lastCardFromColum.id == card.id) {
+
             const toColumnInfoIndex = _.findIndex(copyGrupsCardsDict, (columInfo) => columInfo.index == toColumn.index && columInfo.type == toColumn.type)
             const toColumnInfo = { ...copyGrupsCardsDict[toColumnInfoIndex] }
-            // Remove cards fron fromColumnInfo
-            fromColumnInfo.cards.splice(_.size(fromColumnInfo.cards) - 1, 1)
-            // Add cards toColum
-            toColumnInfo.cards = [...toColumnInfo.cards, lastCardFromColum]
 
-            // Flip las card
-            const lastCardToColum = _.last(fromColumnInfo.cards)
-            if (lastCardToColum && (!lastCardToColum.revelate || !lastCardToColum.canMove)) {
-              _.last(fromColumnInfo.cards).revelate = true
-              _.last(fromColumnInfo.cards).canMove = true
+            if ((_.size(toColumnInfo.cards) == 0 && card.column == 0) ||
+              (_.size(toColumnInfo.cards) > 0 && _.last(toColumnInfo.cards).row == card.row && _.last(toColumnInfo.cards).column == card.column -1)) {
+              // Remove cards fron fromColumnInfo
+              fromColumnInfo.cards.splice(_.size(fromColumnInfo.cards) - 1, 1)
+              // Add cards toColum
+              toColumnInfo.cards = [...toColumnInfo.cards, lastCardFromColum]
+
+              // Flip las card
+              const lastCardToColum = _.last(fromColumnInfo.cards)
+              if (lastCardToColum && (!lastCardToColum.revelate || !lastCardToColum.canMove)) {
+                _.last(fromColumnInfo.cards).revelate = true
+                _.last(fromColumnInfo.cards).canMove = true
+              }
+              copyGrupsCardsDict[fromColumnInfoIndex] = fromColumnInfo;
+              copyGrupsCardsDict[toColumnInfoIndex] = toColumnInfo;
+              console.log(copyGrupsCardsDict)
+              return copyGrupsCardsDict
             }
-            copyGrupsCardsDict[fromColumnInfoIndex] = fromColumnInfo;
-            copyGrupsCardsDict[toColumnInfoIndex] = toColumnInfo;
-            console.log(copyGrupsCardsDict)
-            return copyGrupsCardsDict
+
+
           }
         }
 
@@ -146,20 +157,49 @@ const CardSets = ({ cardsList, numColumns }) => {
           const fromColumnInfo = { ...copyGrupsCardsDict[fromColumnInfoIndex] }
           const toColumnInfoIndex = _.findIndex(copyGrupsCardsDict, (columInfo) => columInfo.index == toColumn.index && columInfo.type == toColumn.type)
           const toColumnInfo = { ...copyGrupsCardsDict[toColumnInfoIndex] }
-          // Find index of card
-          const indexCard = _.findIndex(fromColumnInfo.cards, (originalCard) => originalCard.id == card.id)
-          if (indexCard > -1) {
-            const cardRemplace = { ...fromColumnInfo.cards[indexCard] }
-            // Remove cards fron fromColumnInfo
-            fromColumnInfo.cards.splice(indexCard, 1)
-            // Add cards toColum
-            toColumnInfo.cards = [...toColumnInfo.cards, cardRemplace]
+         
+          if ((_.size(toColumnInfo.cards) == 0 && card.column == 12) ||
+          (_.size(toColumnInfo.cards) > 0 && _.last(toColumnInfo.cards).row % 2 != card.row % 2 && _.last(toColumnInfo.cards).column -1 == card.column)){
+              // Find index of card
+            const indexCard = _.findIndex(fromColumnInfo.cards, (originalCard) => originalCard.id == card.id)
+            if (indexCard > -1) {
+              const cardRemplace = { ...fromColumnInfo.cards[indexCard] }
+              // Remove cards fron fromColumnInfo
+              fromColumnInfo.cards.splice(indexCard, 1)
+              // Add cards toColum
+              toColumnInfo.cards = [...toColumnInfo.cards, cardRemplace]
+            }
+            console.log(fromColumnInfo)
+            copyGrupsCardsDict[fromColumnInfoIndex] = fromColumnInfo;
+            copyGrupsCardsDict[toColumnInfoIndex] = toColumnInfo;
+            return copyGrupsCardsDict
           }
-          console.log(fromColumnInfo)
-          copyGrupsCardsDict[fromColumnInfoIndex] = fromColumnInfo;
-          copyGrupsCardsDict[toColumnInfoIndex] = toColumnInfo;
-          return copyGrupsCardsDict
 
+        
+        }
+        else if (fromColumnInfoIndex > -1 && toColumn.type == 'discarColum') {
+          const fromColumnInfo = { ...copyGrupsCardsDict[fromColumnInfoIndex] }
+          const toColumnInfoIndex = _.findIndex(copyGrupsCardsDict, (columInfo) => columInfo.index == toColumn.index && columInfo.type == toColumn.type)
+          const toColumnInfo = { ...copyGrupsCardsDict[toColumnInfoIndex] }
+         
+          if ((_.size(toColumnInfo.cards) == 0 && card.column == 0) ||
+          (_.size(toColumnInfo.cards) > 0 && _.last(toColumnInfo.cards).row == card.row && _.last(toColumnInfo.cards).column  == card.column -1)){
+              // Find index of card
+            const indexCard = _.findIndex(fromColumnInfo.cards, (originalCard) => originalCard.id == card.id)
+            if (indexCard > -1) {
+              const cardRemplace = { ...fromColumnInfo.cards[indexCard] }
+              // Remove cards fron fromColumnInfo
+              fromColumnInfo.cards.splice(indexCard, 1)
+              // Add cards toColum
+              toColumnInfo.cards = [...toColumnInfo.cards, cardRemplace]
+            }
+            console.log(fromColumnInfo)
+            copyGrupsCardsDict[fromColumnInfoIndex] = fromColumnInfo;
+            copyGrupsCardsDict[toColumnInfoIndex] = toColumnInfo;
+            return copyGrupsCardsDict
+          }
+
+        
         }
       }
 
@@ -169,6 +209,10 @@ const CardSets = ({ cardsList, numColumns }) => {
           const fromColumnInfo = { ...copyGrupsCardsDict[fromColumnInfoIndex] }
           const toColumnInfoIndex = _.findIndex(copyGrupsCardsDict, (columInfo) => columInfo.index == toColumn.index && columInfo.type == toColumn.type)
           const toColumnInfo = { ...copyGrupsCardsDict[toColumnInfoIndex] }
+          
+          if ((_.size(toColumnInfo.cards) == 0 && card.column == 12) ||
+          (_.size(toColumnInfo.cards) > 0 && _.last(toColumnInfo.cards).row % 2 != card.row % 2 && _.last(toColumnInfo.cards).column- 1 == card.column)){
+
           // Find index of card
           const indexCard = _.findIndex(fromColumnInfo.cards, (originalCard) => originalCard.id == card.id)
           if (indexCard > -1) {
@@ -182,6 +226,8 @@ const CardSets = ({ cardsList, numColumns }) => {
           copyGrupsCardsDict[fromColumnInfoIndex] = fromColumnInfo;
           copyGrupsCardsDict[toColumnInfoIndex] = toColumnInfo;
           return copyGrupsCardsDict
+          }
+
 
         }
       }
