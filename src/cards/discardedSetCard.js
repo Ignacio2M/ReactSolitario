@@ -4,22 +4,20 @@ import { useDrop } from 'react-dnd';
 
 const _ = require('lodash');
 
-const DiscarSet = ({id, listCard, moveCard}) => {
+const DiscarSet = ({column, cardsList, moveCard}) => {
     const [, drop] = useDrop({
         accept: 'CARD',
         drop: (item) => {
-            if (item.fromColumn !== id) {
-                moveCard(item.fromColumn, id, item.card);
+            if (item.fromColumn.index !== column.index || 
+                item.fromColumn.type !== column.type) {
+                moveCard(item.fromColumn, column, item.card);
             }
         }
     });
     
     return (
-        <div ref={drop} style={{
-            height: "95px",
-            width: "100px"
-        }}>
-            {_.size(listCard)>0? <Card key={_.last(listCard).id} card={_.last(listCard)} fromColumn={id} />: <></>}
+        <div ref={drop} className="discarArea">
+            {_.size(cardsList)>0? <Card key={_.last(cardsList).id} card={_.last(cardsList)} fromColumn={column} />: <></>}
         </div>
     );
 
