@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import ColumCard from './cardColumn';
+import DiscarSet from './discardedSetCard';
 import ReservedCards from './resrvedCards';
 
 const _ = require('lodash');
@@ -48,9 +49,9 @@ const CardSets = ({ cardsList, numColums }) => {
   }
 
   const [grupsCards, setGrupsCards] = useState(shafelCards)
+  const [discarSet, setDescarSet] = useState([[],[],[],[]])
 
-
-
+  
 
 
 
@@ -126,6 +127,7 @@ const CardSets = ({ cardsList, numColums }) => {
   }
 
 
+
   return (
     <DndProvider backend={HTML5Backend}>
       <div className='reservationPack'>
@@ -136,6 +138,10 @@ const CardSets = ({ cardsList, numColums }) => {
         <div className='column'>
           {grupsCards.slice(0, numColums).map((cardInfo, index) => (<ColumCard key={index} listCards={cardInfo} id={index} moveCard={moveCard} />))}
         </div>
+      </div>
+
+      <div className='discarCoplums'>
+        {discarSet.map((cardSet, index) => (<DiscarSet key={index} id={"discar"+index} listCard={cardSet} moveCard={moveCard}></DiscarSet>))}
       </div>
     </DndProvider>
 
