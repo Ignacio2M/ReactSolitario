@@ -7,7 +7,7 @@ const _ = require('lodash');
 const { useEffect } = React;
 
 
-const ReservedCards = ({ cardsList, id, _flipCard}) => {
+const ReservedCards = ({ cardsList, column, flipCard}) => {
 
     const [cards, setCards] = useState(cardsList);
 
@@ -15,7 +15,7 @@ const ReservedCards = ({ cardsList, id, _flipCard}) => {
 
 
 
-    const flipCard = () => {
+    const _flipCard = () => {
         
         // setCards((cardsList) => {
         //     const newListCopy = [...cardsList]
@@ -38,11 +38,10 @@ const ReservedCards = ({ cardsList, id, _flipCard}) => {
 
         const indexLast = _.findLastIndex(cards, (card) => !card.revelate && !card.canMove)
         if (indexLast > -1){
-            _flipCard(id, cards[indexLast])
+            // console.log(cards[indexLast])
+            flipCard(column, cards[indexLast])
         }else{
-            cards.map((card) => {
-                _flipCard(id, card)
-                        })
+            cards.map((card) => {flipCard(column, card)})
         }
 
     }
@@ -52,20 +51,20 @@ const ReservedCards = ({ cardsList, id, _flipCard}) => {
     return (
         <div
 
-            onClick={() => { flipCard() }}
+            onClick={() => { _flipCard() }}
             style={{ position: "absolute" }}
         >
 
             <div style={{ position: "absolute" }}>
                 {cards.filter((card) => !card.canMove).map((card) =>
-                    (<Card key={card.id} card={card} fromColumn={id} positionStyle={"absolute"} />)
+                    (<Card key={card.id} card={card} fromColumn={column} positionStyle={"absolute"} />)
                 )}
             </div>
 
             <div style={{ paddingLeft: "189px" }}>
                 {cards.filter((card) => card.canMove).reverse().map((card) => {
                     // console.log(card)
-                    return (<Card key={card.id} card={card} fromColumn={id} positionStyle={"absolute"} />)
+                    return (<Card key={card.id} card={card} fromColumn={column} positionStyle={"absolute"} />)
                 }
 
                 )}
