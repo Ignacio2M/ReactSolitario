@@ -78,7 +78,7 @@ const App = () => {
       {/* <ColumCard listCards={[{type:0, number:0}, {type:0, number:1}, {type:0, number:2}]} />
       <ColumCard listCards={[{type:1, number:0}, {type:1, number:1}, {type:1, number:2}]} /> */}
 
-      <CardSets cardsList = {cardsInfo.cards} numColums = {7} />
+      <CardSets cardsList = {cardsInfo.cards} numColumns = {7} />
       
     </div>
   );

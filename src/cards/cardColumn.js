@@ -7,13 +7,13 @@ import { useDrop } from 'react-dnd';
 const { forwardRef, useRef, useImperativeHandle, useEffect } = React;
 const _ = require('lodash');
 
-const ColumCard = ({ listCards, id, moveCard }) => {
+const ColumCard = ({ listCards, column, moveCard }) => {
     const [, drop] = useDrop({
         accept: 'CARD',
         drop: (item) => {
-            if (item.fromColumn !== id) {
-                console.log("aaaaa")
-                moveCard(item.fromColumn, id, item.card);
+            if (item.fromColumn.index !== column.index || 
+                item.fromColumn.type !== column.type) {
+                moveCard(item.fromColumn, column, item.card);
             }
         }
     });
@@ -21,10 +21,15 @@ const ColumCard = ({ listCards, id, moveCard }) => {
 
     return (
         <div ref={drop} className='parent'>
-            <h2>{id}</h2>
-            {listCards.map(card =>{
+            <h2>{`${column.type}_${column.index}`}</h2>
+            {listCards.map(card => {
                 // console.log(card)
-                return (<Card key={card.id+card.revelate} card={card} fromColumn={id} />)
+                return (
+                    <Card
+                        key={card.id + card.revelate}
+                        card={card}
+                        fromColumn={column}
+                        />)
             })}
         </div>
     );

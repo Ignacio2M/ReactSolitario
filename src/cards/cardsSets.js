@@ -10,139 +10,230 @@ const _ = require('lodash');
 
 const { forwardRef, useRef, useImperativeHandle, useEffect } = React;
 
-const CardSets = ({ cardsList, numColums }) => {
+const CardSets = ({ cardsList, numColumns }) => {
 
-  const [grupsCardsDict, setGrupsCardsDict] = useState([])
 
-  const shafelCards = () => {
-    for (let i = cardsList.length - 1; i > 0; i--) {
+  const shuffleCards = () => {
+    // shuffle
+    for (let i = _.size(cardsList) - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [cardsList[i], cardsList[j]] = [cardsList[j], cardsList[i]];
     }
 
-    let new_list = cardsList
-    let setsCards = []
-    // console.log(grupsCards)
+    const supSetColum = (_listCards, numItems) => {
 
-    for (let i = numColums - 1; i >= 0; i--) {
-      const supSet = _.slice(new_list, 0, i + 1)
-      new_list = new_list.filter(elemento => !supSet.includes(elemento));
+      if (_.size(_listCards) < numItems) {
+        throw new Error(`Can't be crate new supSet: ${_.size(_listCards)} > ${numItems}`);
+      }
+
+      const supSet = _.cloneDeep(_.slice(_listCards, 0, numItems))
+      _listCards = _.differenceBy(_listCards, supSet, 'id')
+
       _.last(supSet).revelate = true
       _.last(supSet).canMove = true
 
-      setGrupsCardsDict((lastValue) => {
-        return [{ type: 'game', index: i }, ...lastValue]
-      })
-
-      // console.log(_.last(supSet))
-      setsCards = [supSet, ...setsCards]
+      if (numItems == 1) {
+        return [supSet, _listCards]
+      } else {
+        const listSupSets = supSetColum(_listCards, numItems - 1)
+        return [supSet, ...listSupSets]
+      }
     }
 
-    // reserve pack of cards
-    setGrupsCardsDict((lastValue) => {
-      return [{ type: 'game', index: numColums + 1 }, ...lastValue]
-    })
-
-    setsCards = [...setsCards, new_list]
-
-    return setsCards
+    return supSetColum(cardsList, numColumns)
   }
 
-  const [grupsCards, setGrupsCards] = useState(shafelCards)
-  const [discarSet, setDescarSet] = useState([[],[],[],[]])
+  const buildDictData = () => {
+    // Game columns
+    // const columsGame = (numColumns) => {
+    //   if (numColumns == 0){
+    //     return [{type: 'columGame', index: 0}]
 
-  
+    //   }else{
+    //     const colum = {type: 'columGame', index: numColumns}
+    //     const clomunDict = columsGame(numColumns-1)
+    //     return[...clomunDict, colum]
+    //   }
+    // }
+    // const cloums = columsGame(numColumns)
+
+
+    // return [...cloums, {type: 'reservePack', index: numColumns+1}]
+
+    const colums = shuffleCards()
+    const columnsDict = colums.map((setCards, index) => { return { type: 'columGame', cards: setCards, index: index } })
+    _.last(columnsDict).type = "reservePack"
+    return columnsDict
+
+  }
+
+  // const [grupsCards, setGrupsCards] = useState(shuffleCards)
+  const [grupsCardsDict, setGrupsCardsDict] = useState(buildDictData)
+  const [discarSet, setDescarSet] = useState([[], [], [], []])
+
+
 
 
 
 
   const moveCard = (fromColumn, toColumn, card) => {
-    // console.log({
-    //   fromColumn: fromColumn, 
-    //   toColumn: toColumn, 
-    //   card: card
-    // })
+    console.log({
+      fromColumn: fromColumn,
+      toColumn: toColumn,
+      card: card
+    })
 
+    const updateCards = (prevColumns) => {
+      const copyGrupsCardsDict = _.cloneDeep(prevColumns)
 
+      if (fromColumn.type == 'columGame') {
+        const fromColumnInfoIndex = _.findIndex(copyGrupsCardsDict, (columInfo) => columInfo.index == fromColumn.index && columInfo.type == fromColumn.type)
+        if (fromColumnInfoIndex > -1 && toColumn.type == 'columGame') {
+          const fromColumnInfo = { ...copyGrupsCardsDict[fromColumnInfoIndex] }
+          const toColumnInfoIndex = _.findIndex(copyGrupsCardsDict, (columInfo) => columInfo.index == toColumn.index && columInfo.type == toColumn.type)
+          const toColumnInfo = { ...copyGrupsCardsDict[toColumnInfoIndex] }
+          // Find index of card
+          const indexCard = _.findIndex(fromColumnInfo.cards, (originalCard) => originalCard.id == card.id)
+          if (indexCard > -1) {
+            const cardsPack = _.slice(fromColumnInfo.cards, indexCard, _.size(fromColumnInfo.cards))
+            console.log(cardsPack)
+            // Remove cards fron fromColumnInfo
+            fromColumnInfo.cards.splice(indexCard, _.size(cardsPack))
+            // Add cards toColum
+            toColumnInfo.cards = [...toColumnInfo.cards, ...cardsPack]
 
-    setGrupsCards(prevColumns => {
-      // Clonar las columnas para evitar mutación directa
-      const newColumns = [...prevColumns];
-      const fromColumnCards = [...newColumns[fromColumn]];
-      const toColumnCards = [...newColumns[toColumn]];
+          }
+          // Flip las card
+          const lastCardToColum = _.last(fromColumnInfo.cards)
+          if (lastCardToColum && (!lastCardToColum.revelate || !lastCardToColum.canMove)) {
+            _.last(fromColumnInfo.cards).revelate = true
+            _.last(fromColumnInfo.cards).canMove = true
+          }
+          copyGrupsCardsDict[fromColumnInfoIndex] = fromColumnInfo;
+          copyGrupsCardsDict[toColumnInfoIndex] = toColumnInfo;
+          console.log(copyGrupsCardsDict)
+          return copyGrupsCardsDict
 
-      const cardIndex = fromColumnCards.indexOf(card);
-      console.log(cardIndex)
-
-      // Expecial cases
-      if (cardIndex > -1 && fromColumn == _.size(grupsCards) - 1) {
-
-        fromColumnCards.splice(cardIndex, 1);
-        const newToColumnCards = toColumnCards.concat([card])
-
-        newColumns[fromColumn] = fromColumnCards;
-        newColumns[toColumn] = newToColumnCards;
-        console.log(fromColumnCards)
-        return newColumns;
-      }
-      // Normal Case
-      else if (cardIndex > -1 && card.canMove) {
-        const setCartReverse = _.slice(fromColumnCards, cardIndex, _.size(fromColumnCards))
-
-        fromColumnCards.splice(cardIndex, _.size(setCartReverse));
-        const newToColumnCards = toColumnCards.concat(setCartReverse);
-        if (_.size(fromColumnCards) > 0) {
-          _.last(fromColumnCards).revelate = true
-          _.last(fromColumnCards).canMove = true
         }
-
-        newColumns[fromColumn] = fromColumnCards;
-        newColumns[toColumn] = newToColumnCards;
-
-        return newColumns;
       }
-      return prevColumns;
+      else if (fromColumn.type == 'reservePack'){
+        const fromColumnInfoIndex = _.findIndex(copyGrupsCardsDict, (columInfo) => columInfo.index == fromColumn.index && columInfo.type == fromColumn.type)
+        if (fromColumnInfoIndex > -1 && toColumn.type == 'columGame') {
+          const fromColumnInfo = { ...copyGrupsCardsDict[fromColumnInfoIndex] }
+          const toColumnInfoIndex = _.findIndex(copyGrupsCardsDict, (columInfo) => columInfo.index == toColumn.index && columInfo.type == toColumn.type)
+          const toColumnInfo = { ...copyGrupsCardsDict[toColumnInfoIndex] }
+          // Find index of card
+          const indexCard = _.findIndex(fromColumnInfo.cards, (originalCard) => originalCard.id == card.id)
+          if (indexCard > -1) {
+            const cardRemplace = {... fromColumnInfo.cards[indexCard]}
+            // Remove cards fron fromColumnInfo
+            fromColumnInfo.cards.splice(indexCard, 1)
+            // Add cards toColum
+            toColumnInfo.cards = [...toColumnInfo.cards, cardRemplace]
+          }
+          console.log(fromColumnInfo)
+          copyGrupsCardsDict[fromColumnInfoIndex] = fromColumnInfo;
+          copyGrupsCardsDict[toColumnInfoIndex] = toColumnInfo;
+          return copyGrupsCardsDict
 
-    });
+        }
+      }
+      return grupsCardsDict
+
+    }
+
+    setGrupsCardsDict(prevColumns => updateCards(prevColumns))
+
   };
 
   const flipCard = (fromColumn, card) => {
-    setGrupsCards(prevColumns => {
-      // Clonar las columnas para evitar mutación directa
-      const newColumns = [...prevColumns];
-      const fromColumnCards = [...newColumns[fromColumn]];
+    // console.log({
+    //   fromColumn:fromColumn,
+    //   card: card
+    // })
 
-      const cardIndex = fromColumnCards.indexOf(card);
-      if (cardIndex > -1) {
-        card.revelate = !card.revelate
-        card.canMove = !card.canMove
-        fromColumnCards.splice(cardIndex, 1);
-        const newFromColumnCards = [...fromColumnCards, card]
-        newColumns[fromColumn] = newFromColumnCards;
-        return newColumns;
+    const flip = (prevColumns) =>{
+      const copyGrupsCardsDict = _.cloneDeep(prevColumns)
+      const fromColumnInfoIndex = _.findIndex(copyGrupsCardsDict, (columInfo) => columInfo.index == fromColumn.index && columInfo.type == fromColumn.type)
+      if (fromColumnInfoIndex > -1) {
+        const fromColumnInfo = { ...copyGrupsCardsDict[fromColumnInfoIndex] }
+        // Find index of card
+        const indexCard = _.findIndex(fromColumnInfo.cards, (originalCard) => originalCard.id == card.id)
+        if (indexCard > -1) {
+          fromColumnInfo.cards[indexCard].revelate = !fromColumnInfo.cards[indexCard].revelate
+          fromColumnInfo.cards[indexCard].canMove = !fromColumnInfo.cards[indexCard].canMove
+        }
+        copyGrupsCardsDict[fromColumnInfoIndex] = fromColumnInfo;
+        // console.log(copyGrupsCardsDict)
+        return copyGrupsCardsDict
       }
-      return prevColumns;
-    })
+      return prevColumns
+    }
+
+    if (fromColumn.type == 'reservePack'){
+      setGrupsCardsDict(prevColumns => flip(prevColumns))
+    }
+
+    // setGrupsCards(prevColumns => {
+    //   // Clonar las columnas para evitar mutación directa
+    //   const newColumns = [...prevColumns];
+    //   const fromColumnCards = [...newColumns[fromColumn]];
+
+    //   const cardIndex = fromColumnCards.indexOf(card);
+    //   if (cardIndex > -1) {
+    //     card.revelate = !card.revelate
+    //     card.canMove = !card.canMove
+    //     fromColumnCards.splice(cardIndex, 1);
+    //     const newFromColumnCards = [...fromColumnCards, card]
+    //     newColumns[fromColumn] = newFromColumnCards;
+    //     return newColumns;
+    //   }
+    //   return prevColumns;
+    // })
 
   }
 
+  const sowCards = () => {
+    // console.log(grupsCardsDict)
+  }
 
 
   return (
     <DndProvider backend={HTML5Backend}>
       <div className='reservationPack'>
-        {grupsCards.slice(numColums, _.size(grupsCards)).map((cardInfo, index) => (<ReservedCards key={cardInfo} cardsList={cardInfo} id={_.size(grupsCards) - 1} _flipCard={flipCard}></ReservedCards>))}
+        {grupsCardsDict.filter((columsInfo) => columsInfo.type == "reservePack").map((columsInfo) => {
+          console.log(`${columsInfo.type}_${columsInfo.index}_${_.size(columsInfo.cards.filter((card) => card.revelate && card.canMove))}`)
+          return ( <ReservedCards
+            key={`${columsInfo.type}_${columsInfo.index}_${_.size(columsInfo.cards.filter((card) => card.revelate && card.canMove))}`}
+            cardsList={columsInfo.cards}
+            column={{ index: columsInfo.index, type: columsInfo.type }}
+            flipCard={flipCard}
+          />)
+        }
+          )}
 
       </div>
-      <div className='gameZone'>
+      <div className='gameZone'
+      // onClick={() => sowCards()}
+      >
         <div className='column'>
-          {grupsCards.slice(0, numColums).map((cardInfo, index) => (<ColumCard key={index} listCards={cardInfo} id={index} moveCard={moveCard} />))}
+          {grupsCardsDict.filter((columsInfo) => columsInfo.type == "columGame").map((columsInfo) => {
+            // console.log({index: columsInfo.index, type: columsInfo.type})
+            return (<ColumCard
+              key={`${columsInfo.type}_${columsInfo.index}_${_.size(columsInfo.cards)}`}
+              listCards={columsInfo.cards}
+              column={{ index: columsInfo.index, type: columsInfo.type }}
+              moveCard={moveCard} />)
+          }
+          )}
+
+          {/* {grupsCards.slice(0, numColumns).map((cardInfo, index) => (<ColumCard key={index} listCards={cardInfo} id={index} moveCard={moveCard} />))} */}
         </div>
       </div>
 
-      <div className='discarCoplums'>
+      {/* <div className='discarCoplums'>
         {discarSet.map((cardSet, index) => (<DiscarSet key={index} id={"discar"+index} listCard={cardSet} moveCard={moveCard}></DiscarSet>))}
-      </div>
+      </div> */}
     </DndProvider>
 
   );

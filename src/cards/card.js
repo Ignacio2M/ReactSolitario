@@ -66,7 +66,7 @@ const Card = ({card, fromColumn, positionStyle}) => {
 
   const [, drag] = useDrag({
     type: 'CARD',
-    item: { type: 'CARD', card, fromColumn },
+    item: { type: 'CARD', card, fromColumn},
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -75,7 +75,7 @@ const Card = ({card, fromColumn, positionStyle}) => {
 
   return (
     <div
-    ref={drag}
+    ref={card.canMove? drag: undefined}
       style={{
         backgroundImage: 'url("Cards_a.png")',
         backgroundPosition: skin,
@@ -86,7 +86,6 @@ const Card = ({card, fromColumn, positionStyle}) => {
         borderStyle: 'solid',
         position:positionStyle? positionStyle : 'relative'
       }}
-      // draggable={canMove}
       // onDragStart={handleDragStart}
       onClick={() => {flipCard()}}
       // cardId = {cardId}
